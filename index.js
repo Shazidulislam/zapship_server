@@ -65,6 +65,19 @@ async function run() {
       }
     });
 
+    // GET: get a specific parcel by ID
+    app.get("/parcel/:id" , async(req , res)=>{
+      try{
+        const id = req.params.id;
+        const result = await parcelCollection.findOne({_id:new ObjectId(id)});
+        res.send(result)
+      }
+      catch(error){
+        console.log("error from fetching parcel",error)
+        res.status(500).send({message:"Failel to fetch parcel"})
+      }
+    })
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
