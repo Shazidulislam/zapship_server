@@ -3,7 +3,7 @@ const app = express();
 const cors = require("cors");
 const port = process.env.PORT || 4000;
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 app.use(cors());
 app.use(express.json());
 
@@ -34,15 +34,36 @@ async function run() {
       }
     });
 
-    // //GET: All parcels OR parcels by user (created_by), sorted by Latest
-    // app.get("/parcels" , async(req , res)=>{
-    //     const userEmail = req.query.email;
+    //GET: All parcels OR parcels by user (created_by), sorted by Latest
+    app.get("/parcels", async (req, res) => {
+      try {
+        const userEmail = req.query.email;
 
-    //     const query = userEmail?{createdByEmail:userEmail}:{};
-    //     const options = {
-    //         sort:{createdAt:-1 }
-    //     }
-    // })
+        const query = userEmail ? { createdByEmail: userEmail } : {};
+        const options = {
+          sort: { createdAt: -1 },
+        };
+
+        const parcels = await parcelCollection.find(query, options).toArray();
+        res.send(parcels);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: "Field to get parcel!" });
+      }
+    });
+
+    // delete a parcel by api
+
+    app.delete("/parcels/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+        const query = { _id: new ObjectId(id) };
+        const result = await parcelCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({message:"Field to delete parcel"})
+      }
+    });
 
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
